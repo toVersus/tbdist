@@ -5,6 +5,34 @@ import (
 	"testing"
 )
 
+var saveTaskTests = []struct {
+	name   string
+	ds     *Datastore
+	task   Task
+	expect []Task
+}{
+	{
+		name: "should save the new task in the datastore",
+		ds:   &Datastore{},
+		task: Task{Title: "withdraw my money", Status: "DOING"},
+		expect: []Task{
+			{1, "withdraw my money", "DOING"},
+		},
+	},
+	{
+		name: "should update the existing task in the datastore",
+		ds: &Datastore{
+			tasks: []Task{
+				{1, "withdraw my money", "DOING"},
+			},
+		},
+		task: Task{1, "withdraw my money", "DONE"},
+		expect: []Task{
+			{1, "withdraw my money", "DONE"},
+		},
+	},
+}
+
 func TestGetPendingTasks(t *testing.T) {
 	t.Log("getting pending tasks...")
 
@@ -22,37 +50,16 @@ func TestGetPendingTasks(t *testing.T) {
 	}
 }
 
-func TestSaveNewTask(t *testing.T) {
+func TestSaveTask(t *testing.T) {
 	t.Log("saving task...")
 
-	ds := Datastore{}
-	task := Task{Title: "withdraw my money"}
-	expect := []Task{
-		{1, "withdraw my money", "DOING"},
-	}
+	for _, testcase := range saveTaskTests {
+		t.Log(testcase.name)
+		t.Log(testcase.task.Status)
+		testcase.ds.SaveTask(testcase.task)
 
-	t.Log("should save the new task in the store")
-	ds.SaveTask(task)
-	if !reflect.DeepEqual(ds.tasks, expect) {
-		t.Errorf("=> Got %#v expected %#v", ds.tasks, expect)
-	}
-}
-
-func TestSaveAndUpdateExistingTask(t *testing.T) {
-	t.Log("saving task...")
-	ds := Datastore{
-		tasks: []Task{
-			{1, "withdraw my money", "DOING"},
-		},
-	}
-	expect := []Task{
-		{1, "withdraw my money", "DONE"},
-	}
-	task := Task{1, "withdraw my money", "DONE"}
-
-	t.Log("should update the existing task in the store")
-	ds.SaveTask(task)
-	if !reflect.DeepEqual(ds.tasks, expect) {
-		t.Errorf("=> Got %#v expected %#v", ds.tasks, expect)
+		if !reflect.DeepEqual(testcase.ds.tasks, testcase.expect) {
+			t.Errorf("=> Got %#v expected %#v", testcase.ds.tasks, testcase.expect)
+		}
 	}
 }
