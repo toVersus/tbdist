@@ -37,3 +37,22 @@ func TestSaveNewTask(t *testing.T) {
 		t.Errorf("=> Got %#v expected %#v", ds.tasks, expect)
 	}
 }
+
+func TestSaveAndUpdateExistingTask(t *testing.T) {
+	t.Log("saving task...")
+	ds := Datastore{
+		tasks: []Task{
+			{1, "withdraw my money", "DOING"},
+		},
+	}
+	expect := []Task{
+		{1, "withdraw my money", "DONE"},
+	}
+	task := Task{1, "withdraw my money", "DONE"}
+
+	t.Log("should update the existing task in the store")
+	ds.SaveTask(task)
+	if !reflect.DeepEqual(ds.tasks, expect) {
+		t.Errorf("=> Got %#v expected %#v", ds.tasks, expect)
+	}
+}
