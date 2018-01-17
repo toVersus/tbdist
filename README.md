@@ -5,7 +5,7 @@
 ## Feature
 - [ ] list up items to be done
 - [ ] assign item numbers in order
-- [ ] display the items in three different status: TODO, DOING, DONE
+- [ ] display the items in two different status: DOING, PENDING, DONE
 - [ ] assign priority to the items with scale of one to three
 - [ ] set a deadline to the items
 - [ ] edit the items
