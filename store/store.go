@@ -9,7 +9,8 @@ type Task struct {
 
 // Datastore manages a list of tasks stored in memory
 type Datastore struct {
-	tasks []Task
+	tasks  []Task
+	lastID int // lastID is incremented for each new stored task
 }
 
 // GetPendingTasks returns all the tasks which need to be done
@@ -21,4 +22,12 @@ func (ds *Datastore) GetPendingTasks() []Task {
 		}
 	}
 	return pendingTasks
+}
+
+// SaveTask saves the task in the datastore
+func (ds *Datastore) SaveTask(task Task) {
+	ds.lastID++
+	task.ID = ds.lastID
+	task.Status = "DOING"
+	ds.tasks = append(ds.tasks, task)
 }

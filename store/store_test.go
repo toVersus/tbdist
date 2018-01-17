@@ -21,3 +21,19 @@ func TestGetPendingTasks(t *testing.T) {
 		t.Errorf("Got %#v expected %#v", result, expect)
 	}
 }
+
+func TestSaveNewTask(t *testing.T) {
+	t.Log("saving task...")
+
+	ds := Datastore{}
+	task := Task{Title: "withdraw my money"}
+	expect := []Task{
+		{1, "withdraw my money", "DOING"},
+	}
+
+	t.Log("should save the new task in the store")
+	ds.SaveTask(task)
+	if !reflect.DeepEqual(ds.tasks, expect) {
+		t.Errorf("=> Got %#v expected %#v", ds.tasks, expect)
+	}
+}
