@@ -10,6 +10,7 @@ var saveTaskTests = []struct {
 	ds     *Datastore
 	task   Task
 	expect []Task
+	err    error
 }{
 	{
 		name: "should save the new task in the datastore",
@@ -30,6 +31,12 @@ var saveTaskTests = []struct {
 		expect: []Task{
 			{1, "withdraw my money", "DONE"},
 		},
+	},
+	{
+		name: "should return an error when task ID does not exist",
+		ds:   &Datastore{},
+		task: Task{1, "withdraw my money", "DONE"},
+		err:  ErrTaskNotFound,
 	},
 }
 
@@ -57,7 +64,7 @@ func TestSaveTask(t *testing.T) {
 		t.Log(testcase.name)
 		t.Log(testcase.task.Status)
 		testcase.ds.SaveTask(testcase.task)
-
+		t.Log(testcase.task.Status)
 		if !reflect.DeepEqual(testcase.ds.tasks, testcase.expect) {
 			t.Errorf("=> Got %#v expected %#v", testcase.ds.tasks, testcase.expect)
 		}
