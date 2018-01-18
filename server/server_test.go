@@ -17,12 +17,10 @@ func TestGetPendingTasks(t *testing.T) {
 
 	req, _ := http.NewRequest(http.MethodGet, "/tasks/pending", nil)
 
-	ds = &store.Datastore{
-		Tasks: []store.Task{
-			{1, "go to school", "PENDING"},
-			{2, "withdraw my money", "PENDING"},
-		},
-	}
+	// The datastore is restored at the end of the test
+	defer func() { ds = &store.Datastore{} }()
+
+	ds = &mockedStore{}
 
 	GetPendingTasks(rec, req)
 
