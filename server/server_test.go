@@ -60,6 +60,11 @@ var addTaskTests = []struct {
 		body:   []byte(`["Title":"buy bread for breakfast."]`),
 		expect: http.StatusBadRequest,
 	},
+	{
+		name:   "should response bad argument when task title is empty",
+		body:   []byte(`["Title":""]`),
+		expect: http.StatusBadRequest,
+	},
 }
 
 func TestAddTask(t *testing.T) {

@@ -55,6 +55,11 @@ func AddTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if t.Title == "" {
+		http.Error(w, "Title is missing", http.StatusBadRequest)
+		return
+	}
+
 	if err := ds.SaveTask(t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
