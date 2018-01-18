@@ -10,17 +10,27 @@ import (
 // Store defines the datastore services
 type Store interface {
 	GetPendingTasks() []store.Task
+	SaveTask(task store.Task) error
 }
 
 var ds Store = &store.Datastore{}
 
-type mockedStore struct{}
+type mockedStore struct {
+	SaveTaskFunc func(task store.Task) error
+}
 
 func (ms *mockedStore) GetPendingTasks() []store.Task {
 	return []store.Task{
 		{1, "go to school", "PENDING"},
 		{2, "withdraw my money", "PENDING"},
 	}
+}
+
+func (ms *mockedStore) SaveTask(task store.Task) error {
+	if ms.SaveTaskFunc != nil {
+		return ms.SaveTaskFunc(task)
+	}
+	return nil
 }
 
 // GetPendingTasks returns pending tasks as a JSON response
@@ -31,4 +41,24 @@ func GetPendingTasks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(j)
+}
+
+// AddTask handles POST requests on /tasks.
+// Return 201 if the task could be created
+// Return 400 when JSON could not be decoded into a task
+// datastore returned an error
+func AddTask(w http.ResponseWriter, r *http.Request) {
+	var t store.Task
+
+	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := ds.SaveTask(t); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
