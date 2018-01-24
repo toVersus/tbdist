@@ -15,15 +15,29 @@ type Datastore struct {
 	lastID int // lastID is incremented for each new stored task
 }
 
-// GetPendingTasks returns all the tasks which need to be done
-func (ds *Datastore) GetPendingTasks() []model.Task {
-	var pendingTasks []model.Task
+func (ds *Datastore) getTasks(status string) []model.Task {
+	var tasks []model.Task
 	for _, task := range ds.tasks {
-		if task.Status == "PENDING" {
-			pendingTasks = append(pendingTasks, task)
+		if task.Status == status {
+			tasks = append(tasks, task)
 		}
 	}
-	return pendingTasks
+	return tasks
+}
+
+// GetPendingTasks returns all the tasks putting on hold for now
+func (ds *Datastore) GetPendingTasks() []model.Task {
+	return ds.getTasks("PENDING")
+}
+
+// GetDoingTasks returns all the tasks in progress
+func (ds *Datastore) GetDoingTasks() []model.Task {
+	return ds.getTasks("DOING")
+}
+
+// GetDoneTasks returns all the completed tasks
+func (ds *Datastore) GetDoneTasks() []model.Task {
+	return ds.getTasks("DONE")
 }
 
 // SaveTask should save the task in the datastore if the task

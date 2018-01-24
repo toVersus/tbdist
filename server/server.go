@@ -12,6 +12,8 @@ import (
 // Store defines the datastore services
 type Store interface {
 	GetPendingTasks() []model.Task
+	GetDoingTasks() []model.Task
+	GetDoneTasks() []model.Task
 	SaveTask(task model.Task) error
 }
 
@@ -28,6 +30,20 @@ func (ms *mockedStore) GetPendingTasks() []model.Task {
 	}
 }
 
+func (ms *mockedStore) GetDoingTasks() []model.Task {
+	return []model.Task{
+		{1, "go to school", "DOING"},
+		{2, "withdraw my money", "DOING"},
+	}
+}
+
+func (ms *mockedStore) GetDoneTasks() []model.Task {
+	return []model.Task{
+		{1, "go to school", "DONE"},
+		{2, "withdraw my money", "DONE"},
+	}
+}
+
 func (ms *mockedStore) SaveTask(task model.Task) error {
 	if ms.SaveTaskFunc != nil {
 		return ms.SaveTaskFunc(task)
@@ -38,9 +54,23 @@ func (ms *mockedStore) SaveTask(task model.Task) error {
 // GetPendingTasks returns pending tasks as a JSON response
 func GetPendingTasks(w http.ResponseWriter, r *http.Request) {
 	t := ds.GetPendingTasks()
-
 	j, _ := json.Marshal(t)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
+}
 
+// GetDoingTasks returns tasks in progress as a JSON response
+func GetDoingTasks(w http.ResponseWriter, r *http.Request) {
+	t := ds.GetDoingTasks()
+	j, _ := json.Marshal(t)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
+}
+
+// GetDoneTasks returns tasks in progress as a JSON response
+func GetDoneTasks(w http.ResponseWriter, r *http.Request) {
+	t := ds.GetDoneTasks()
+	j, _ := json.Marshal(t)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(j)
 }

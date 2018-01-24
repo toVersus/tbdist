@@ -7,6 +7,61 @@ import (
 	"github.com/toversus/tbdist/model"
 )
 
+var getTasksTests = []struct {
+	name   string
+	ds     *Datastore
+	status string
+	expect []model.Task
+	err    error
+}{
+	{
+		name: "should return only pending tasks",
+		ds: &Datastore{
+			tasks: []model.Task{
+				{ID: 1, Title: "go to school", Status: "DONE"},
+				{ID: 2, Title: "withdraw my money", Status: "PENDING"},
+				{ID: 3, Title: "play piano", Status: "DOING"},
+				{ID: 4, Title: "go shopping", Status: "PENDING"},
+			},
+		},
+		status: "PENDING",
+		expect: []model.Task{
+			{ID: 2, Title: "withdraw my money", Status: "PENDING"},
+			{ID: 4, Title: "go shopping", Status: "PENDING"},
+		},
+	},
+	{
+		name: "should return only completed task",
+		ds: &Datastore{
+			tasks: []model.Task{
+				{ID: 1, Title: "go to school", Status: "DONE"},
+				{ID: 2, Title: "withdraw my money", Status: "PENDING"},
+				{ID: 3, Title: "play piano", Status: "DOING"},
+				{ID: 4, Title: "go shopping", Status: "PENDING"},
+			},
+		},
+		status: "DONE",
+		expect: []model.Task{
+			{ID: 1, Title: "go to school", Status: "DONE"},
+		},
+	},
+	{
+		name: "should return only tasks in progress",
+		ds: &Datastore{
+			tasks: []model.Task{
+				{ID: 1, Title: "go to school", Status: "DONE"},
+				{ID: 2, Title: "withdraw my money", Status: "PENDING"},
+				{ID: 3, Title: "play piano", Status: "DOING"},
+				{ID: 4, Title: "go shopping", Status: "PENDING"},
+			},
+		},
+		status: "DOING",
+		expect: []model.Task{
+			{ID: 3, Title: "play piano", Status: "DOING"},
+		},
+	},
+}
+
 var saveTaskTests = []struct {
 	name   string
 	ds     *Datastore
@@ -42,20 +97,15 @@ var saveTaskTests = []struct {
 	},
 }
 
-func TestGetPendingTasks(t *testing.T) {
-	t.Log("getting pending tasks...")
+func TestGetTasks(t *testing.T) {
+	t.Log("getting tasks...")
 
-	ds := Datastore{
-		tasks: []model.Task{
-			{ID: 1, Title: "go to school", Status: "DONE"},
-			{ID: 2, Title: "withdraw my money", Status: "PENDING"},
-		},
-	}
-
-	expect := []model.Task{ds.tasks[1]}
-	t.Log("should return the tasks witch need to be completed")
-	if result := ds.GetPendingTasks(); !reflect.DeepEqual(result, expect) {
-		t.Errorf("Got %#v expected %#v", result, expect)
+	for _, testcase := range getTasksTests {
+		t.Log(testcase.name)
+		t.Log(testcase.status)
+		if !reflect.DeepEqual(testcase.ds.getTasks(testcase.status), testcase.expect) {
+			t.Errorf("=> Got %#v expected %#v", testcase.ds.tasks, testcase.expect)
+		}
 	}
 }
 
