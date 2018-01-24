@@ -5,29 +5,30 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/toversus/tbdist/model"
 	"github.com/toversus/tbdist/store"
 )
 
 // Store defines the datastore services
 type Store interface {
-	GetPendingTasks() []store.Task
-	SaveTask(task store.Task) error
+	GetPendingTasks() []model.Task
+	SaveTask(task model.Task) error
 }
 
 var ds Store = &store.Datastore{}
 
 type mockedStore struct {
-	SaveTaskFunc func(task store.Task) error
+	SaveTaskFunc func(task model.Task) error
 }
 
-func (ms *mockedStore) GetPendingTasks() []store.Task {
-	return []store.Task{
+func (ms *mockedStore) GetPendingTasks() []model.Task {
+	return []model.Task{
 		{1, "go to school", "PENDING"},
 		{2, "withdraw my money", "PENDING"},
 	}
 }
 
-func (ms *mockedStore) SaveTask(task store.Task) error {
+func (ms *mockedStore) SaveTask(task model.Task) error {
 	if ms.SaveTaskFunc != nil {
 		return ms.SaveTaskFunc(task)
 	}
@@ -49,7 +50,7 @@ func GetPendingTasks(w http.ResponseWriter, r *http.Request) {
 // Return 400 when JSON could not be decoded into a task
 // datastore returned an error
 func AddTask(w http.ResponseWriter, r *http.Request) {
-	var t store.Task
+	var t model.Task
 
 	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -74,7 +75,7 @@ func AddTask(w http.ResponseWriter, r *http.Request) {
 // Return 400 when JSON could not be decoded into a task or
 // datastore returned an error or task title is empty
 func UpdateTask(w http.ResponseWriter, r *http.Request) {
-	var t store.Task
+	var t model.Task
 
 	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -94,7 +95,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func validateTask(t store.Task) error {
+func validateTask(t model.Task) error {
 	if t.Title == "" {
 		return errors.New("Title is missing")
 	}

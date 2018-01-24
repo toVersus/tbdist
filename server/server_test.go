@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/toversus/tbdist/model"
 	"github.com/toversus/tbdist/store"
 )
 
@@ -38,7 +39,7 @@ func TestGetPendingTasks(t *testing.T) {
 
 var addTaskTests = []struct {
 	name     string
-	saveFunc func(task store.Task) error
+	saveFunc func(task model.Task) error
 	body     []byte
 	expect   int
 }{
@@ -54,7 +55,7 @@ var addTaskTests = []struct {
 	},
 	{
 		name: "should response bad argument when datastore returns an error",
-		saveFunc: func(task store.Task) error {
+		saveFunc: func(task model.Task) error {
 			return errors.New("datastore error")
 		},
 		body:   []byte(`["Title":"buy bread for breakfast."]`),
@@ -92,7 +93,7 @@ func TestAddTask(t *testing.T) {
 
 var updateTaskTests = []struct {
 	name     string
-	saveFunc func(task store.Task) error
+	saveFunc func(task model.Task) error
 	body     []byte
 	expect   int
 }{
@@ -108,7 +109,7 @@ var updateTaskTests = []struct {
 	},
 	{
 		name: "should response with a statu 400 Bad Request when the datastore returned an error",
-		saveFunc: func(task store.Task) error {
+		saveFunc: func(task model.Task) error {
 			return errors.New("datastore error")
 		},
 		body:   []byte(`{"ID":1, "Title":"buy bread for breakfast.", "Status": "DONE"}`),
