@@ -25,22 +25,22 @@ type mockedStore struct {
 
 func (ms *mockedStore) GetPendingTasks() []model.Task {
 	return []model.Task{
-		{ID: 1, Title: "go to school", Status: "PENDING"},
-		{ID: 2, Title: "withdraw my money", Status: "PENDING"},
+		{ID: 1, Title: "go to school", Status: "PENDING", Priority: 1},
+		{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 10},
 	}
 }
 
 func (ms *mockedStore) GetDoingTasks() []model.Task {
 	return []model.Task{
-		{ID: 1, Title: "go to school", Status: "DOING"},
-		{ID: 2, Title: "withdraw my money", Status: "DOING"},
+		{ID: 1, Title: "go to school", Status: "DOING", Priority: 1},
+		{ID: 2, Title: "withdraw my money", Status: "DOING", Priority: 10},
 	}
 }
 
 func (ms *mockedStore) GetDoneTasks() []model.Task {
 	return []model.Task{
-		{ID: 1, Title: "go to school", Status: "DONE"},
-		{ID: 2, Title: "withdraw my money", Status: "DONE"},
+		{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
+		{ID: 2, Title: "withdraw my money", Status: "DONE", Priority: 10},
 	}
 }
 
@@ -131,6 +131,9 @@ func validateTask(t model.Task) error {
 	}
 	if t.Status != "DONE" && t.Status != "DOING" && t.Status != "PENDING" {
 		return errors.New("Invalid status")
+	}
+	if t.Priority == 0 || t.Priority > 10 {
+		return errors.New("Invalid priority number")
 	}
 	return nil
 }

@@ -31,7 +31,7 @@ func TestGetPendingTasks(t *testing.T) {
 		t.Errorf("KO => Got %d expected %d", rec.Code, http.StatusOK)
 	}
 
-	expect := "[{\"id\":1,\"title\":\"go to school\",\"status\":\"PENDING\"},{\"id\":2,\"title\":\"withdraw my money\",\"status\":\"PENDING\"}]"
+	expect := "[{\"id\":1,\"title\":\"go to school\",\"status\":\"PENDING\",\"priority\":1},{\"id\":2,\"title\":\"withdraw my money\",\"status\":\"PENDING\",\"priority\":10}]"
 	if result := rec.Body.String(); result != expect {
 		t.Errorf("KO => Got %s expected %s", result, expect)
 	}
@@ -45,7 +45,7 @@ var addTaskTests = []struct {
 }{
 	{
 		name:   "should add new task from JSON",
-		body:   []byte(`{"Title":"buy bread for breakfast.","Status":"DOING"}`),
+		body:   []byte(`{"Title":"buy bread for breakfast.","Status":"DOING", "Priority":1}`),
 		expect: http.StatusCreated,
 	},
 	{
@@ -68,7 +68,12 @@ var addTaskTests = []struct {
 	},
 	{
 		name:   "should response bad argument when task status is invalid",
-		body:   []byte(`["Title":"buy bread for breakfast.","Status":"HOGE"]`),
+		body:   []byte(`["Title":"buy bread for breakfast.","Status":"HOGE","Priority":1]`),
+		expect: http.StatusBadRequest,
+	},
+	{
+		name:   "should response bad argument when task priority is invalid",
+		body:   []byte(`["Title":"buy bread for breakfast.","Status":"DOING","Priority":100]`),
 		expect: http.StatusBadRequest,
 	},
 }
@@ -104,7 +109,7 @@ var updateTaskTests = []struct {
 }{
 	{
 		name:   "should response with a status 200 OK the task was updated",
-		body:   []byte(`{"ID":1, "Title":"buy bread for breakfast.", "Status":"DONE"}`),
+		body:   []byte(`{"ID":1, "Title":"buy bread for breakfast.", "Status":"DONE", "Priority":1}`),
 		expect: http.StatusOK,
 	},
 	{
@@ -117,7 +122,7 @@ var updateTaskTests = []struct {
 		saveFunc: func(task model.Task) error {
 			return errors.New("datastore error")
 		},
-		body:   []byte(`{"ID":1, "Title":"buy bread for breakfast.", "Status": "DONE"}`),
+		body:   []byte(`{"ID":1, "Title":"buy bread for breakfast.", "Status": "DONE", "Priority":1}`),
 		expect: http.StatusBadRequest,
 	},
 	{

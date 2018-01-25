@@ -18,46 +18,46 @@ var getTasksTests = []struct {
 		name: "should return only pending tasks",
 		ds: &Datastore{
 			tasks: []model.Task{
-				{ID: 1, Title: "go to school", Status: "DONE"},
-				{ID: 2, Title: "withdraw my money", Status: "PENDING"},
-				{ID: 3, Title: "play piano", Status: "DOING"},
-				{ID: 4, Title: "go shopping", Status: "PENDING"},
+				{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
+				{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 1},
+				{ID: 3, Title: "play piano", Status: "DOING", Priority: 10},
+				{ID: 4, Title: "go shopping", Status: "PENDING", Priority: 10},
 			},
 		},
 		status: "PENDING",
 		expect: []model.Task{
-			{ID: 2, Title: "withdraw my money", Status: "PENDING"},
-			{ID: 4, Title: "go shopping", Status: "PENDING"},
+			{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 1},
+			{ID: 4, Title: "go shopping", Status: "PENDING", Priority: 10},
 		},
 	},
 	{
 		name: "should return only completed task",
 		ds: &Datastore{
 			tasks: []model.Task{
-				{ID: 1, Title: "go to school", Status: "DONE"},
-				{ID: 2, Title: "withdraw my money", Status: "PENDING"},
-				{ID: 3, Title: "play piano", Status: "DOING"},
-				{ID: 4, Title: "go shopping", Status: "PENDING"},
+				{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
+				{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 3},
+				{ID: 3, Title: "play piano", Status: "DOING", Priority: 5},
+				{ID: 4, Title: "go shopping", Status: "PENDING", Priority: 7},
 			},
 		},
 		status: "DONE",
 		expect: []model.Task{
-			{ID: 1, Title: "go to school", Status: "DONE"},
+			{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
 		},
 	},
 	{
 		name: "should return only tasks in progress",
 		ds: &Datastore{
 			tasks: []model.Task{
-				{ID: 1, Title: "go to school", Status: "DONE"},
-				{ID: 2, Title: "withdraw my money", Status: "PENDING"},
-				{ID: 3, Title: "play piano", Status: "DOING"},
-				{ID: 4, Title: "go shopping", Status: "PENDING"},
+				{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
+				{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 3},
+				{ID: 3, Title: "play piano", Status: "DOING", Priority: 5},
+				{ID: 4, Title: "go shopping", Status: "PENDING", Priority: 7},
 			},
 		},
 		status: "DOING",
 		expect: []model.Task{
-			{ID: 3, Title: "play piano", Status: "DOING"},
+			{ID: 3, Title: "play piano", Status: "DOING", Priority: 5},
 		},
 	},
 }
@@ -72,27 +72,27 @@ var saveTaskTests = []struct {
 	{
 		name: "should save the new task in the datastore",
 		ds:   &Datastore{},
-		task: model.Task{Title: "withdraw my money", Status: "DOING"},
+		task: model.Task{Title: "withdraw my money", Status: "DOING", Priority: 1},
 		expect: []model.Task{
-			{ID: 1, Title: "withdraw my money", Status: "DOING"},
+			{ID: 1, Title: "withdraw my money", Status: "DOING", Priority: 1},
 		},
 	},
 	{
 		name: "should update the existing task in the datastore",
 		ds: &Datastore{
 			tasks: []model.Task{
-				{ID: 1, Title: "withdraw my money", Status: "DOING"},
+				{ID: 1, Title: "withdraw my money", Status: "DOING", Priority: 9},
 			},
 		},
-		task: model.Task{ID: 1, Title: "withdraw my money", Status: "DONE"},
+		task: model.Task{ID: 1, Title: "withdraw my money", Status: "DONE", Priority: 9},
 		expect: []model.Task{
-			{ID: 1, Title: "withdraw my money", Status: "DONE"},
+			{ID: 1, Title: "withdraw my money", Status: "DONE", Priority: 9},
 		},
 	},
 	{
 		name: "should return an error when task ID does not exist",
 		ds:   &Datastore{},
-		task: model.Task{ID: 1, Title: "withdraw my money", Status: "DONE"},
+		task: model.Task{ID: 1, Title: "withdraw my money", Status: "DONE", Priority: 5},
 		err:  ErrTaskNotFound,
 	},
 }
