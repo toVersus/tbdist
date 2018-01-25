@@ -1,14 +1,13 @@
 # Tbdist
 
-:eyeglasses: Tbdist is a simple to do list application written in Golang just using standard library.
+:eyeglasses: Tbdist is a simple todo list API server written in Golang just using standard library.
 
 ## Feature
-- [ ] list up items to be done
-- [ ] assign item numbers in order
-- [ ] display the items in two different status: DOING, PENDING, DONE
+- [x] todo item consists of item number (automatically assigned), title, status (DOING, DONE, PENDING)
+- [x] get list of items
+- [x] save new item
+- [x] update the content of items
 - [ ] assign priority to the items with scale of one to three
 - [ ] set a deadline to the items
-- [ ] edit the items
 - [ ] delete the items
-- [ ] rearrange the items
-- [ ] sort the items
+- [ ] sort the list ofitems
