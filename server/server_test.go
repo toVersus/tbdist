@@ -45,7 +45,7 @@ var addTaskTests = []struct {
 }{
 	{
 		name:   "should add new task from JSON",
-		body:   []byte(`{"Title":"buy bread for breakfast."}`),
+		body:   []byte(`{"Title":"buy bread for breakfast.","Status":"DOING"}`),
 		expect: http.StatusCreated,
 	},
 	{
@@ -64,6 +64,11 @@ var addTaskTests = []struct {
 	{
 		name:   "should response bad argument when task title is empty",
 		body:   []byte(`["Title":""]`),
+		expect: http.StatusBadRequest,
+	},
+	{
+		name:   "should response bad argument when task status is invalid",
+		body:   []byte(`["Title":"buy bread for breakfast.","Status":"HOGE"]`),
 		expect: http.StatusBadRequest,
 	},
 }

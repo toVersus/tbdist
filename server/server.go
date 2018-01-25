@@ -25,22 +25,22 @@ type mockedStore struct {
 
 func (ms *mockedStore) GetPendingTasks() []model.Task {
 	return []model.Task{
-		{1, "go to school", "PENDING"},
-		{2, "withdraw my money", "PENDING"},
+		{ID: 1, Title: "go to school", Status: "PENDING"},
+		{ID: 2, Title: "withdraw my money", Status: "PENDING"},
 	}
 }
 
 func (ms *mockedStore) GetDoingTasks() []model.Task {
 	return []model.Task{
-		{1, "go to school", "DOING"},
-		{2, "withdraw my money", "DOING"},
+		{ID: 1, Title: "go to school", Status: "DOING"},
+		{ID: 2, Title: "withdraw my money", Status: "DOING"},
 	}
 }
 
 func (ms *mockedStore) GetDoneTasks() []model.Task {
 	return []model.Task{
-		{1, "go to school", "DONE"},
-		{2, "withdraw my money", "DONE"},
+		{ID: 1, Title: "go to school", Status: "DONE"},
+		{ID: 2, Title: "withdraw my money", Status: "DONE"},
 	}
 }
 
@@ -128,6 +128,9 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 func validateTask(t model.Task) error {
 	if t.Title == "" {
 		return errors.New("Title is missing")
+	}
+	if t.Status != "DONE" && t.Status != "DOING" && t.Status != "PENDING" {
+		return errors.New("Invalid status")
 	}
 	return nil
 }

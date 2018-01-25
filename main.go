@@ -11,6 +11,8 @@ import (
 func main() {
 	r := &router.Router{}
 	r.HandleFunc("/tasks/pending", http.MethodGet, server.GetPendingTasks)
+	r.HandleFunc("/tasks/doing", http.MethodGet, server.GetDoingTasks)
+	r.HandleFunc("/tasks/done", http.MethodGet, server.GetDoneTasks)
 	r.HandleFunc("/tasks", http.MethodPost, server.AddTask)
 	r.HandleFunc(`/tasks/\d`, http.MethodPut, server.UpdateTask)
 

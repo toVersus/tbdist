@@ -47,7 +47,6 @@ func (ds *Datastore) SaveTask(task model.Task) error {
 	if task.ID == 0 {
 		ds.lastID++
 		task.ID = ds.lastID
-		task.Status = "DOING"
 		ds.tasks = append(ds.tasks, task)
 		return nil
 	}
