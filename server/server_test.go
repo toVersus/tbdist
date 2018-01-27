@@ -12,28 +12,36 @@ import (
 )
 
 type mockedStore struct {
-	GetTaskFunc  func() []model.Task
+	GetTaskFunc  func() model.Tasks
 	SaveTaskFunc func(task model.Task) error
 }
 
-func (ms *mockedStore) GetPendingTasks() []model.Task {
-	return []model.Task{
+func (ms *mockedStore) GetPendingTasks() model.Tasks {
+	return model.Tasks{
 		{ID: 1, Title: "go to school", Status: "PENDING", Priority: 1},
 		{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 10},
 	}
 }
 
-func (ms *mockedStore) GetDoingTasks() []model.Task {
-	return []model.Task{
+func (ms *mockedStore) GetDoingTasks() model.Tasks {
+	return model.Tasks{
 		{ID: 1, Title: "go to school", Status: "DOING", Priority: 1},
 		{ID: 2, Title: "withdraw my money", Status: "DOING", Priority: 10},
 	}
 }
 
-func (ms *mockedStore) GetDoneTasks() []model.Task {
-	return []model.Task{
+func (ms *mockedStore) GetDoneTasks() model.Tasks {
+	return model.Tasks{
 		{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
 		{ID: 2, Title: "withdraw my money", Status: "DONE", Priority: 10},
+	}
+}
+
+func (ms *mockedStore) GetPendingTasksSortedByPriority() model.Tasks {
+	return model.Tasks{
+		{ID: 1, Title: "go to school", Status: "PENDING", Priority: 1},
+		{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 10},
+		{ID: 3, Title: "go shopping", Status: "PENDING", Priority: 5},
 	}
 }
 
@@ -46,7 +54,7 @@ func (ms *mockedStore) SaveTask(task model.Task) error {
 
 var getTaskTests = []struct {
 	name    string
-	getFunc func() []model.Task
+	getFunc func() model.Tasks
 	getTask func(w http.ResponseWriter, r *http.Request)
 	expect  string
 }{
@@ -75,6 +83,46 @@ func TestGetPendingTasks(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/tasks/pending", nil)
+
+		// The datastore is restored at the end of the test
+		defer func() { ds = &store.Datastore{} }()
+
+		ds = &mockedStore{
+			GetTaskFunc: testcase.getFunc,
+		}
+
+		testcase.getTask(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Errorf("KO => Got %d expected %d", rec.Code, http.StatusOK)
+		}
+		if result := rec.Body.String(); result != testcase.expect {
+			t.Errorf("KO => Got %s expected %s", result, testcase.expect)
+		}
+	}
+}
+
+var getTaskSortedByPriorityTests = []struct {
+	name    string
+	getFunc func() model.Tasks
+	getTask func(w http.ResponseWriter, r *http.Request)
+	expect  string
+}{
+	{
+		name:    "should return pending tasks sorted by prioriey as JSON",
+		getTask: GetPendingTasksSortedByPriority,
+		expect:  "[{\"id\":1,\"title\":\"go to school\",\"status\":\"PENDING\",\"priority\":1},{\"id\":3,\"title\":\"go shopping\",\"status\":\"PENDING\",\"priority\":5},{\"id\":2,\"title\":\"withdraw my money\",\"status\":\"PENDING\",\"priority\":10}]",
+	},
+}
+
+func TestGetPendingTasksSortedByPriority(t *testing.T) {
+	t.Log("getting pending tasks sorted by priority...")
+
+	for _, testcase := range getTaskSortedByPriorityTests {
+		t.Log(testcase.name)
+
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, "/tasks/pending?sort=-priority", nil)
 
 		// The datastore is restored at the end of the test
 		defer func() { ds = &store.Datastore{} }()

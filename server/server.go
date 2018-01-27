@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/toversus/tbdist/model"
@@ -11,9 +12,10 @@ import (
 
 // Store defines the datastore services
 type Store interface {
-	GetPendingTasks() []model.Task
-	GetDoingTasks() []model.Task
-	GetDoneTasks() []model.Task
+	GetPendingTasks() model.Tasks
+	GetDoingTasks() model.Tasks
+	GetDoneTasks() model.Tasks
+	GetPendingTasksSortedByPriority() model.Tasks
 	SaveTask(task model.Task) error
 }
 
@@ -38,6 +40,15 @@ func GetDoingTasks(w http.ResponseWriter, r *http.Request) {
 // GetDoneTasks returns tasks in progress as a JSON response
 func GetDoneTasks(w http.ResponseWriter, r *http.Request) {
 	t := ds.GetDoneTasks()
+	j, _ := json.Marshal(t)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
+}
+
+// GetPendingTasksSortedByPriority returns tasks in progress sorted by priority as a JSON response
+func GetPendingTasksSortedByPriority(w http.ResponseWriter, r *http.Request) {
+	t := ds.GetPendingTasksSortedByPriority()
+	log.Printf("%+v\n", t)
 	j, _ := json.Marshal(t)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(j)

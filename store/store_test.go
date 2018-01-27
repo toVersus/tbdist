@@ -11,13 +11,13 @@ var getTasksTests = []struct {
 	name   string
 	ds     *Datastore
 	status string
-	expect []model.Task
+	expect model.Tasks
 	err    error
 }{
 	{
 		name: "should return only pending tasks",
 		ds: &Datastore{
-			tasks: []model.Task{
+			tasks: model.Tasks{
 				{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
 				{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 1},
 				{ID: 3, Title: "play piano", Status: "DOING", Priority: 10},
@@ -25,7 +25,7 @@ var getTasksTests = []struct {
 			},
 		},
 		status: "PENDING",
-		expect: []model.Task{
+		expect: model.Tasks{
 			{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 1},
 			{ID: 4, Title: "go shopping", Status: "PENDING", Priority: 10},
 		},
@@ -33,7 +33,7 @@ var getTasksTests = []struct {
 	{
 		name: "should return only completed task",
 		ds: &Datastore{
-			tasks: []model.Task{
+			tasks: model.Tasks{
 				{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
 				{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 3},
 				{ID: 3, Title: "play piano", Status: "DOING", Priority: 5},
@@ -41,14 +41,14 @@ var getTasksTests = []struct {
 			},
 		},
 		status: "DONE",
-		expect: []model.Task{
+		expect: model.Tasks{
 			{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
 		},
 	},
 	{
 		name: "should return only tasks in progress",
 		ds: &Datastore{
-			tasks: []model.Task{
+			tasks: model.Tasks{
 				{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
 				{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 3},
 				{ID: 3, Title: "play piano", Status: "DOING", Priority: 5},
@@ -56,8 +56,34 @@ var getTasksTests = []struct {
 			},
 		},
 		status: "DOING",
-		expect: []model.Task{
+		expect: model.Tasks{
 			{ID: 3, Title: "play piano", Status: "DOING", Priority: 5},
+		},
+	},
+}
+
+var getTasksSortedByPriorityTests = []struct {
+	name   string
+	ds     *Datastore
+	status string
+	expect model.Tasks
+	err    error
+}{
+	{
+		name: "should return pending tasks sorted by priority",
+		ds: &Datastore{
+			tasks: model.Tasks{
+				{ID: 1, Title: "go to school", Status: "PENDING", Priority: 7},
+				{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 3},
+				{ID: 3, Title: "play piano", Status: "DOING", Priority: 5},
+				{ID: 4, Title: "go shopping", Status: "PENDING", Priority: 2},
+			},
+		},
+		status: "PENDING",
+		expect: model.Tasks{
+			{ID: 4, Title: "go shopping", Status: "PENDING", Priority: 2},
+			{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 3},
+			{ID: 1, Title: "go to school", Status: "PENDING", Priority: 7},
 		},
 	},
 }
@@ -66,14 +92,14 @@ var saveTaskTests = []struct {
 	name   string
 	ds     *Datastore
 	task   model.Task
-	expect []model.Task
+	expect model.Tasks
 	err    error
 }{
 	{
 		name: "should save the new task in the datastore",
 		ds:   &Datastore{},
 		task: model.Task{Title: "withdraw my money", Status: "DOING", Priority: 1},
-		expect: []model.Task{
+		expect: model.Tasks{
 			{ID: 1, Title: "withdraw my money", Status: "DOING", Priority: 1},
 		},
 	},
@@ -85,7 +111,7 @@ var saveTaskTests = []struct {
 			},
 		},
 		task: model.Task{ID: 1, Title: "withdraw my money", Status: "DONE", Priority: 9},
-		expect: []model.Task{
+		expect: model.Tasks{
 			{ID: 1, Title: "withdraw my money", Status: "DONE", Priority: 9},
 		},
 	},
@@ -105,6 +131,18 @@ func TestGetTasks(t *testing.T) {
 		t.Log(testcase.status)
 		if !reflect.DeepEqual(testcase.ds.getTasks(testcase.status), testcase.expect) {
 			t.Errorf("=> Got %#v expected %#v", testcase.ds.tasks, testcase.expect)
+		}
+	}
+}
+
+func TestGetTasksSortedByPriority(t *testing.T) {
+	t.Log("getting tasks sorted by priority...")
+
+	for _, testcase := range getTasksSortedByPriorityTests {
+		t.Log(testcase.name)
+		t.Log(testcase.status)
+		if !reflect.DeepEqual(testcase.ds.getTasksSortedByPriority(testcase.status), testcase.expect) {
+			t.Errorf("=> Got %#v,\n => expected %#v", testcase.ds.tasks, testcase.expect)
 		}
 	}
 }
