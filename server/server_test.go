@@ -11,29 +11,86 @@ import (
 	"github.com/toversus/tbdist/store"
 )
 
+type mockedStore struct {
+	GetTaskFunc  func() []model.Task
+	SaveTaskFunc func(task model.Task) error
+}
+
+func (ms *mockedStore) GetPendingTasks() []model.Task {
+	return []model.Task{
+		{ID: 1, Title: "go to school", Status: "PENDING", Priority: 1},
+		{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 10},
+	}
+}
+
+func (ms *mockedStore) GetDoingTasks() []model.Task {
+	return []model.Task{
+		{ID: 1, Title: "go to school", Status: "DOING", Priority: 1},
+		{ID: 2, Title: "withdraw my money", Status: "DOING", Priority: 10},
+	}
+}
+
+func (ms *mockedStore) GetDoneTasks() []model.Task {
+	return []model.Task{
+		{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
+		{ID: 2, Title: "withdraw my money", Status: "DONE", Priority: 10},
+	}
+}
+
+func (ms *mockedStore) SaveTask(task model.Task) error {
+	if ms.SaveTaskFunc != nil {
+		return ms.SaveTaskFunc(task)
+	}
+	return nil
+}
+
+var getTaskTests = []struct {
+	name    string
+	getFunc func() []model.Task
+	getTask func(w http.ResponseWriter, r *http.Request)
+	expect  string
+}{
+	{
+		name:    "should return pending tasks as JSON",
+		getTask: GetPendingTasks,
+		expect:  "[{\"id\":1,\"title\":\"go to school\",\"status\":\"PENDING\",\"priority\":1},{\"id\":2,\"title\":\"withdraw my money\",\"status\":\"PENDING\",\"priority\":10}]",
+	},
+	{
+		name:    "should return tasks in progress as JSON",
+		getTask: GetDoingTasks,
+		expect:  "[{\"id\":1,\"title\":\"go to school\",\"status\":\"DOING\",\"priority\":1},{\"id\":2,\"title\":\"withdraw my money\",\"status\":\"DOING\",\"priority\":10}]",
+	},
+	{
+		name:    "should return completed tasks as JSON",
+		getTask: GetDoneTasks,
+		expect:  "[{\"id\":1,\"title\":\"go to school\",\"status\":\"DONE\",\"priority\":1},{\"id\":2,\"title\":\"withdraw my money\",\"status\":\"DONE\",\"priority\":10}]",
+	},
+}
+
 func TestGetPendingTasks(t *testing.T) {
 	t.Log("getting pending tasks...")
 
-	t.Log("should return pending tasks as JSON")
+	for _, testcase := range getTaskTests {
+		t.Log(testcase.name)
 
-	rec := httptest.NewRecorder()
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, "/tasks/pending", nil)
 
-	req, _ := http.NewRequest(http.MethodGet, "/tasks/pending", nil)
+		// The datastore is restored at the end of the test
+		defer func() { ds = &store.Datastore{} }()
 
-	// The datastore is restored at the end of the test
-	defer func() { ds = &store.Datastore{} }()
+		ds = &mockedStore{
+			GetTaskFunc: testcase.getFunc,
+		}
 
-	ds = &mockedStore{}
+		testcase.getTask(rec, req)
 
-	GetPendingTasks(rec, req)
-
-	if rec.Code != http.StatusOK {
-		t.Errorf("KO => Got %d expected %d", rec.Code, http.StatusOK)
-	}
-
-	expect := "[{\"id\":1,\"title\":\"go to school\",\"status\":\"PENDING\",\"priority\":1},{\"id\":2,\"title\":\"withdraw my money\",\"status\":\"PENDING\",\"priority\":10}]"
-	if result := rec.Body.String(); result != expect {
-		t.Errorf("KO => Got %s expected %s", result, expect)
+		if rec.Code != http.StatusOK {
+			t.Errorf("KO => Got %d expected %d", rec.Code, http.StatusOK)
+		}
+		if result := rec.Body.String(); result != testcase.expect {
+			t.Errorf("KO => Got %s expected %s", result, testcase.expect)
+		}
 	}
 }
 

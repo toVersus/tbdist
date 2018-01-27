@@ -19,38 +19,6 @@ type Store interface {
 
 var ds Store = &store.Datastore{}
 
-type mockedStore struct {
-	SaveTaskFunc func(task model.Task) error
-}
-
-func (ms *mockedStore) GetPendingTasks() []model.Task {
-	return []model.Task{
-		{ID: 1, Title: "go to school", Status: "PENDING", Priority: 1},
-		{ID: 2, Title: "withdraw my money", Status: "PENDING", Priority: 10},
-	}
-}
-
-func (ms *mockedStore) GetDoingTasks() []model.Task {
-	return []model.Task{
-		{ID: 1, Title: "go to school", Status: "DOING", Priority: 1},
-		{ID: 2, Title: "withdraw my money", Status: "DOING", Priority: 10},
-	}
-}
-
-func (ms *mockedStore) GetDoneTasks() []model.Task {
-	return []model.Task{
-		{ID: 1, Title: "go to school", Status: "DONE", Priority: 1},
-		{ID: 2, Title: "withdraw my money", Status: "DONE", Priority: 10},
-	}
-}
-
-func (ms *mockedStore) SaveTask(task model.Task) error {
-	if ms.SaveTaskFunc != nil {
-		return ms.SaveTaskFunc(task)
-	}
-	return nil
-}
-
 // GetPendingTasks returns pending tasks as a JSON response
 func GetPendingTasks(w http.ResponseWriter, r *http.Request) {
 	t := ds.GetPendingTasks()
